@@ -17,6 +17,8 @@ import com.alibaba.otter.canal.protocol.FlatMessage;
 import com.alibaba.otter.canal.protocol.Message;
 import com.alibaba.otter.canal.spi.CanalMQProducer;
 
+import java.util.Random;
+
 /**
  * kafka producer 主操作类
  *
@@ -74,10 +76,11 @@ public class CanalKafkaProducer implements CanalMQProducer {
 
     @Override
     public void send(MQProperties.CanalDestination canalDestination, Message message, Callback callback) {
-
+        Random rand = new Random();
         // producer.beginTransaction();
         if (!kafkaProperties.getFlatMessage()) {
             try {
+                Integer partition = rand.nextInt(6);
                 ProducerRecord<String, Message> record;
                 if (canalDestination.getPartition() != null) {
                     record = new ProducerRecord<String, Message>(canalDestination.getTopic(),
@@ -85,7 +88,7 @@ public class CanalKafkaProducer implements CanalMQProducer {
                         null,
                         message);
                 } else {
-                    record = new ProducerRecord<String, Message>(canalDestination.getTopic(), 0, null, message);
+                    record = new ProducerRecord<String, Message>(canalDestination.getTopic(), partition, null, message);
                 }
 
                 producer.send(record).get();
@@ -161,3 +164,4 @@ public class CanalKafkaProducer implements CanalMQProducer {
     }
 
 }
+
